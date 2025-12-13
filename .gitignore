@@ -1,0 +1,50 @@
+# ===== Go build artifacts =====
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Build output
+/bin/
+/build/
+/dist/
+
+# Go test & coverage
+*.test
+*.out
+coverage.out
+
+# ===== Dependency / tool cache =====
+# (usually not needed, but safe)
+vendor/
+
+# ===== IDEs & editors =====
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ / GoLand
+.idea/
+*.iml
+
+# Vim
+*.swp
+*.swo
+
+# ===== OS files =====
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# ===== Environment & secrets =====
+.env
+.env.*
+*.local
+
+# ===== Logs =====
+*.log
+logs/
