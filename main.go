@@ -1,14 +1,9 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import "GeekCoding/router"
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	r := router.Router()
 
 	r.Run()
 }
