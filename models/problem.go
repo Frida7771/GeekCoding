@@ -1,10 +1,6 @@
 package models
 
-import (
-	"fmt"
-
-	"gorm.io/gorm"
-)
+import "gorm.io/gorm"
 
 type Problem struct {
 	gorm.Model
@@ -20,11 +16,10 @@ func (table *Problem) TableName() string {
 	return "problem"
 }
 
-func GetProblemList() {
-	data := make([]*Problem, 0)
-	DB.Find(&data)
-	for _, v := range data {
-		fmt.Printf("Problem: %+v\n", v)
+func GetProblemList(keyword string) *gorm.DB {
+	query := DB.Model(new(Problem))
+	if keyword != "" {
+		query = query.Where("title LIKE ? OR content LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
 	}
-
+	return query
 }
