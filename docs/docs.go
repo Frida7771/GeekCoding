@@ -14,48 +14,7 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {
-        "/problem-list": {
-            "get": {
-                "description": "Get a list of problems with pagination",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "problems"
-                ],
-                "summary": "Get Problem List",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "Page number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 10,
-                        "description": "Page size",
-                        "name": "size",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success response",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        }
-    }
+    "paths": {}
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

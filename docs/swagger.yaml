@@ -1,31 +1,4 @@
 info:
   contact: {}
-paths:
-  /problem-list:
-    get:
-      consumes:
-      - application/json
-      description: Get a list of problems with pagination
-      parameters:
-      - default: 1
-        description: Page number
-        in: query
-        name: page
-        type: integer
-      - default: 10
-        description: Page size
-        in: query
-        name: size
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Success response
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get Problem List
-      tags:
-      - problems
+paths: {}
 swagger: "2.0"
