@@ -71,7 +71,8 @@ func GetProblemDetail(c *gin.Context) {
 	}
 
 	data := new(models.ProblemBasic)
-	err := models.DB.Where("identity = ?", identity).First(&data).Error
+	err := models.DB.Where("identity = ?", identity).
+		Preload("ProblemCategorys").Preload("ProblemCategorys.CategoryBasic").First(&data).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusOK, gin.H{
