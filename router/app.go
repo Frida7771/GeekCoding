@@ -17,6 +17,8 @@ func Router() *gin.Engine {
 	//swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	r.GET("/", service.Root)
+
 	r.GET("/ping", service.Ping)
 
 	r.GET("/problem-list", service.GetProblemList)
