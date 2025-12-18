@@ -13,14 +13,14 @@ import (
 )
 
 // GetProblemList
-//@Tafs Public Method
-// @Summary      Problem List
-// @Param        page  query     int     false  "page"
+// @Tags         Public Method
+// @Summary      Get Problem List
+// @Param        page  query     int     false  "page number, default is 1"
 // @Param        size  query     int     false  "size"
-// @Param        keyword  query     string     false  "keyword"
-// @Success      200   {string}    json "{"code": 200, "message""data": ""}"
+// @Param        keyword  query     string     false  "search keyword"
+// @Param        category_identity  query     string     false  "category identity"
+// @Success      200   {string}    json "{"code": 200, "data": ""}"
 // @Router       /problem-list [get]
-
 func GetProblemList(c *gin.Context) {
 	size, err := strconv.Atoi(c.DefaultQuery(define.DefaultSize, define.DefaultSize))
 	if err != nil {
@@ -39,7 +39,7 @@ func GetProblemList(c *gin.Context) {
 	keyword := c.Query("keyword")
 	categoryIdentity := c.Query("category_identity")
 
-	list := make([]models.Problem, 0)
+	list := make([]models.ProblemBasic, 0)
 
 	tx := models.GetProblemList_Basic(keyword, categoryIdentity)
 
@@ -60,6 +60,12 @@ func GetProblemList(c *gin.Context) {
 
 }
 
+// GetProblemDetail
+// @Tags         Public Method
+// @Summary      Get Problem Detail
+// @Param        identity  query     string     true  "problem identity"
+// @Success      200   {string}    json "{"code": 200, "data": ""}"
+// @Router       /problem-detail [get]
 func GetProblemDetail(c *gin.Context) {
 	identity := c.Query("identity")
 	if identity == "" {

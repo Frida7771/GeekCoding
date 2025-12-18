@@ -10,6 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetSubmitList
+// @Tags         Public Method
+// @Summary      Get Submit List
+// @Param        page  query     int     false  "page number, default is 1"
+// @Param        size  query     int     false  "size"
+// @Param        problem_identity  query     string     false  "problem identity"
+// @Param        user_identity  query     string     false  "user identity"
+// @Param        status  query     int     false  "submit status"
+// @Success      200   {string}    json "{"code": 200, "data": ""}"
+// @Router       /submit-list [get]
 func GetSubmitList(c *gin.Context) {
 	size, err := strconv.Atoi(c.DefaultQuery("size", define.DefaultSize))
 	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))

@@ -1,4 +1,125 @@
+basePath: /
+host: localhost:8080
 info:
-  contact: {}
-paths: {}
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a GeekCoding Online Judge API server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: GeekCoding API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      parameters:
+      - description: username
+        in: formData
+        name: username
+        type: string
+      - description: password
+        in: formData
+        name: password
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: User Login
+      tags:
+      - Public Method
+  /problem-detail:
+    get:
+      parameters:
+      - description: problem identity
+        in: query
+        name: identity
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: Get Problem Detail
+      tags:
+      - Public Method
+  /problem-list:
+    get:
+      parameters:
+      - description: page number, default is 1
+        in: query
+        name: page
+        type: integer
+      - description: size
+        in: query
+        name: size
+        type: integer
+      - description: search keyword
+        in: query
+        name: keyword
+        type: string
+      - description: category identity
+        in: query
+        name: category_identity
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: Get Problem List
+      tags:
+      - Public Method
+  /submit-list:
+    get:
+      parameters:
+      - description: page number, default is 1
+        in: query
+        name: page
+        type: integer
+      - description: size
+        in: query
+        name: size
+        type: integer
+      - description: problem identity
+        in: query
+        name: problem_identity
+        type: string
+      - description: user identity
+        in: query
+        name: user_identity
+        type: string
+      - description: submit status
+        in: query
+        name: status
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: Get Submit List
+      tags:
+      - Public Method
+  /user-detail:
+    get:
+      parameters:
+      - description: user identity
+        in: query
+        name: identity
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: Get User Detail
+      tags:
+      - Public Method
 swagger: "2.0"

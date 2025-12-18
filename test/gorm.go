@@ -16,7 +16,7 @@ func TestGorm(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	data := make([]*models.Problem, 0)
+	data := make([]*models.ProblemBasic, 0)
 	err = db.Find(&data).Error
 	if err != nil {
 		panic(err)
