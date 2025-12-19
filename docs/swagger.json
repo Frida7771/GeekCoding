@@ -103,6 +103,30 @@
                 }
             }
         },
+        "/send-code": {
+            "post": {
+                "tags": [
+                    "Public Method"
+                ],
+                "summary": "Send Code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "email",
+                        "name": "email",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": \"\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/submit-list": {
             "get": {
                 "tags": [

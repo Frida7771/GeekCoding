@@ -67,6 +67,21 @@ paths:
       summary: Get Problem List
       tags:
       - Public Method
+  /send-code:
+    post:
+      parameters:
+      - description: email
+        in: formData
+        name: email
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: Send Code
+      tags:
+      - Public Method
   /submit-list:
     get:
       parameters:

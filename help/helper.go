@@ -5,7 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"net/smtp"
+	"os"
+
 	"github.com/golang-jwt/jwt/v5"
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/jordan-wright/email"
 )
 
 type UserClaims struct {
@@ -53,4 +58,19 @@ func AnalyzeToken(tokenString string) (*UserClaims, error) {
 		return nil, fmt.Errorf("analyze token error: %v", err)
 	}
 	return userClaims, nil
+}
+
+// 发送邮件
+func SendCode(toUserEmail, code string) error {
+	e := email.NewEmail()
+	e.From = "<frida16571@gmail.com>"
+	e.To = []string{toUserEmail}
+	e.Subject = "验证码发送"
+	e.HTML = []byte("您的验证码是：<b>" + code + "</b>")
+	err := e.Send("smtp.gmail.com:587", smtp.PlainAuth("", "frida16571@gmail.com", os.Getenv("GMAIL_APP_PASSWORD"), "smtp.gmail.com"))
+	if err != nil {
+		return err
+	}
+	fmt.Println("send code success")
+	return nil
 }

@@ -99,3 +99,33 @@ func Login(c *gin.Context) {
 		},
 	})
 }
+
+// SendCode
+// @Tags         Public Method
+// @Summary      Send Code
+// @Param        email  formData     string     false  "email"
+// @Success      200   {string}    json "{"code": 200, "data": ""}"
+// @Router       /send-code [post]
+func SendCode(c *gin.Context) {
+	email := c.PostForm("email")
+	if email == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "email is required",
+		})
+		return
+	}
+	code := "123456"
+	err := help.SendCode(email, code)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "send code error: " + err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "send code success",
+	})
+}
