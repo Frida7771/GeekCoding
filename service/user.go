@@ -8,6 +8,7 @@ import (
 	"GeekCoding/help"
 
 	"github.com/gin-gonic/gin"
+
 	"gorm.io/gorm"
 )
 
@@ -82,10 +83,19 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	token, err := help.GenerateToken(data.Identity, data.Name)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "generate token error: " + err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": map[string]interface{}{
-			"token": data.Identity,
+			"token": token,
 		},
 	})
 }

@@ -1,6 +1,6 @@
 package define
 
 const (
-	DefaultPage = "1"
+	DefaultPage = ""
 	DefaultSize = ""
 )

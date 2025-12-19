@@ -51,7 +51,7 @@ paths:
   /problem-list:
     get:
       parameters:
-      - description: page number, default is 1
+      - description: page
         in: query
         name: page
         type: integer
@@ -59,17 +59,9 @@ paths:
         in: query
         name: size
         type: integer
-      - description: search keyword
-        in: query
-        name: keyword
-        type: string
-      - description: category identity
-        in: query
-        name: category_identity
-        type: string
       responses:
         "200":
-          description: '{"code": 200, "data": ""}'
+          description: '{"code":"200","msg","","data": ""}'
           schema:
             type: string
       summary: Get Problem List

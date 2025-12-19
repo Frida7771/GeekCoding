@@ -5,7 +5,6 @@ import (
 	"GeekCoding/models"
 	"log"
 	"net/http"
-
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -15,49 +14,40 @@ import (
 // GetProblemList
 // @Tags         Public Method
 // @Summary      Get Problem List
-// @Param        page  query     int     false  "page number, default is 1"
+// @Param        page  query     int     false  "page"
 // @Param        size  query     int     false  "size"
-// @Param        keyword  query     string     false  "search keyword"
-// @Param        category_identity  query     string     false  "category identity"
-// @Success      200   {string}    json "{"code": 200, "data": ""}"
+// @Success      200   {string}    json "{"code":"200","msg","","data": ""}"
 // @Router       /problem-list [get]
 func GetProblemList(c *gin.Context) {
-	size, err := strconv.Atoi(c.DefaultQuery(define.DefaultSize, define.DefaultSize))
+	size, _ := strconv.Atoi(c.DefaultQuery("size", define.DefaultSize))
+	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))
 	if err != nil {
-		log.Println("Get Problem List error: ", err)
-		return
-	}
-	page, err := strconv.Atoi(c.DefaultQuery(define.DefaultPage, define.DefaultPage))
-	if err != nil {
-		log.Println("Get Problem List Page error: ", err)
+		log.Println("GetProblemList Page strconv Error:", err)
 		return
 	}
 	page = (page - 1) * size
-
 	var count int64
-
 	keyword := c.Query("keyword")
 	categoryIdentity := c.Query("category_identity")
 
-	list := make([]models.ProblemBasic, 0)
-
-	tx := models.GetProblemList_Basic(keyword, categoryIdentity)
-
-	err = tx.Count(&count).Limit(size).Find(&list).Error
+	list := make([]*models.ProblemBasic, 0)
+	err = models.GetProblemList_Basic(keyword, categoryIdentity).Distinct("`problem_basic`.`id`").Count(&count).Error
 	if err != nil {
-		log.Println("Get Problem List error: ", err)
+		log.Println("GetProblemList Count Error:", err)
 		return
 	}
-
+	err = models.GetProblemList_Basic(keyword, categoryIdentity).Offset(page).Limit(size).Find(&list).Error
+	if err != nil {
+		log.Println("Get Problem List Error:", err)
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": map[string]interface{}{
 			"list":  list,
 			"count": count,
 		},
-		"count": count,
 	})
-
 }
 
 // GetProblemDetail

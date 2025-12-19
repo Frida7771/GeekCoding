@@ -88,7 +88,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "page number, default is 1",
+                        "description": "page",
                         "name": "page",
                         "in": "query"
                     },
@@ -97,23 +97,11 @@ const docTemplate = `{
                         "description": "size",
                         "name": "size",
                         "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "search keyword",
-                        "name": "keyword",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "category identity",
-                        "name": "category_identity",
-                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 200, \"data\": \"\"}",
+                        "description": "{\"code\":\"200\",\"msg\",\"\",\"data\": \"\"}",
                         "schema": {
                             "type": "string"
                         }
