@@ -16,6 +16,7 @@ import (
 // @Summary      Get Problem List
 // @Param        page  query     int     false  "page"
 // @Param        size  query     int     false  "size"
+// @Param        keyword  query     string     false  "keyword"
 // @Success      200   {string}    json "{"code":"200","msg","","data": ""}"
 // @Router       /problem-list [get]
 func GetProblemList(c *gin.Context) {

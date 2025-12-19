@@ -3,6 +3,8 @@ package help
 import (
 	"crypto/md5"
 	"fmt"
+	"math/rand"
+	"strconv"
 	"time"
 
 	"net/smtp"
@@ -11,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/jordan-wright/email"
+	uuid "github.com/satori/go.uuid"
 )
 
 type UserClaims struct {
@@ -65,7 +68,7 @@ func SendCode(toUserEmail, code string) error {
 	e := email.NewEmail()
 	e.From = "<frida16571@gmail.com>"
 	e.To = []string{toUserEmail}
-	e.Subject = "验证码发送"
+	e.Subject = "验证码已发送，请查收"
 	e.HTML = []byte("您的验证码是：<b>" + code + "</b>")
 	err := e.Send("smtp.gmail.com:587", smtp.PlainAuth("", "frida16571@gmail.com", os.Getenv("GMAIL_APP_PASSWORD"), "smtp.gmail.com"))
 	if err != nil {
@@ -73,4 +76,19 @@ func SendCode(toUserEmail, code string) error {
 	}
 	fmt.Println("send code success")
 	return nil
+}
+
+// get uuid
+func GetUUID() string {
+	return uuid.NewV4().String()
+}
+
+// generate random code
+func GetRandomCode() string {
+	rand.Seed(time.Now().UnixNano())
+	s := ""
+	for i := 0; i < 6; i++ {
+		s += strconv.Itoa(rand.Intn(10))
+	}
+	return s
 }
