@@ -38,6 +38,12 @@ func Router() *gin.Engine {
 
 	// 分页获取分类列表
 	r.GET("/category-list", middlewares.AuthAdmin(), service.GetCategoryList)
+	//create category
+	r.POST("/category-create", middlewares.AuthAdmin(), service.CreateCategory)
+	//delete category
+	r.DELETE("/category-delete", middlewares.AuthAdmin(), service.DeleteCategory)
+	//update category
+	r.PUT("/category-update", middlewares.AuthAdmin(), service.UpdateCategory)
 
 	return r
 }

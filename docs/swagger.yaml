@@ -13,6 +13,52 @@ info:
   title: GeekCoding API
   version: "1.0"
 paths:
+  /category-create:
+    post:
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: parent_id
+        in: formData
+        name: parent_id
+        type: integer
+      responses:
+        "200":
+          description: '{"code":"200","msg","","data": ""}'
+          schema:
+            type: string
+      summary: Create Category
+      tags:
+      - Admin Method
+  /category-delete:
+    delete:
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: identity
+        in: query
+        name: identity
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code":"200","msg","","data": ""}'
+          schema:
+            type: string
+      summary: Delete Category
+      tags:
+      - Admin Method
   /category-list:
     get:
       parameters:
@@ -39,6 +85,36 @@ paths:
           schema:
             type: string
       summary: Get Category List
+      tags:
+      - Admin Method
+  /category-update:
+    put:
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: parent_id
+        in: formData
+        name: parent_id
+        type: integer
+      - description: identity
+        in: query
+        name: identity
+        required: true
+        type: string
+      - description: name
+        in: formData
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code":"200","msg","","data": ""}'
+          schema:
+            type: string
+      summary: Update Category
       tags:
       - Admin Method
   /login:
