@@ -13,6 +13,34 @@ info:
   title: GeekCoding API
   version: "1.0"
 paths:
+  /category-list:
+    get:
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: size
+        in: query
+        name: size
+        type: integer
+      - description: keyword
+        in: query
+        name: keyword
+        type: string
+      responses:
+        "200":
+          description: '{"code":"200","msg","","data": ""}'
+          schema:
+            type: string
+      summary: Get Category List
+      tags:
+      - Admin Method
   /login:
     post:
       parameters:

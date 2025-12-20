@@ -19,7 +19,7 @@ func AuthAdmin() gin.HandlerFunc {
 			})
 			return
 		}
-		if userClaims.IsAdmin != 1 {
+		if userClaims == nil || userClaims.IsAdmin != 1 {
 			c.Abort()
 			c.JSON(http.StatusOK, gin.H{
 				"code": http.StatusForbidden,
