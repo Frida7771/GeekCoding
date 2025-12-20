@@ -6,11 +6,12 @@ type ProblemBasic struct {
 	gorm.Model
 	Identity         string             `gorm:"column:identity;type:varchar(36);" json:"identity"`
 	ProblemCategorys []*ProblemCategory `gorm:"foreignKey:problem_id;references:id"`
-	CategoryID       uint               `gorm:"column:category_id;type:varchar(255);" json:"category_id"`
-	Title            string             `gorm:"column:title;type:varchar(255);" json:"title"`
-	Content          string             `gorm:"column:content;type:text;" json:"content"`
-	MaxRuntime       int                `gorm:"column:max_runtime;type:int(11)" json:"max_runtime"`
-	MaxMem           int                `gorm:"column:max_mem;type:int(11)" json:"max_mem"`
+	// CategoryID       uint               `gorm:"column:category_id;type:varchar(255);" json:"category_id"`
+	Title      string      `gorm:"column:title;type:varchar(255);" json:"title"`
+	Content    string      `gorm:"column:content;type:text;" json:"content"`
+	MaxRuntime int         `gorm:"column:max_runtime;type:int(11)" json:"max_runtime"`
+	MaxMem     int         `gorm:"column:max_mem;type:int(11)" json:"max_mem"`
+	TestCases  []*TestCase `gorm:"foreignKey:problem_identity;references:identity"`
 }
 
 func (table *ProblemBasic) TableName() string {

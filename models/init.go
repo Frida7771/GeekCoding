@@ -14,10 +14,27 @@ var RDB = InitRedis()
 
 func Init() *gorm.DB {
 	dsn := "root:#Etnlhy1396917302@tcp(127.0.0.1:3306)/Geek_Coding?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: true,
+	})
 	if err != nil {
 		log.Println("gorm Init Error", err)
+		return nil
 	}
+
+	// 自动迁移表结构（确保 id 字段是 AUTO_INCREMENT）
+	err = db.AutoMigrate(
+		&ProblemBasic{},
+		&TestCase{},
+		&ProblemCategory{},
+		&User_Basic{},
+		&Submit_Basic{},
+		&CategoryBasic{},
+	)
+	if err != nil {
+		log.Println("AutoMigrate Error", err)
+	}
+
 	return db
 }
 

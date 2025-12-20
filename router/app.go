@@ -2,6 +2,7 @@ package router
 
 import (
 	_ "GeekCoding/docs"
+	"GeekCoding/middlewares"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -31,6 +32,9 @@ func Router() *gin.Engine {
 
 	//submit
 	r.GET("/submit-list", service.GetSubmitList)
+
+	//管理员私有方法
+	r.POST("/problem-create", middlewares.AuthAdmin(), service.ProblemCreate)
 
 	return r
 }

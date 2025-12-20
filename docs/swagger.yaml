@@ -32,6 +32,49 @@ paths:
       summary: User Login
       tags:
       - Public Method
+  /problem-create:
+    post:
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: content
+        in: formData
+        name: content
+        required: true
+        type: string
+      - description: max_runtime
+        in: formData
+        name: max_runtime
+        type: integer
+      - description: max_mem
+        in: formData
+        name: max_mem
+        type: integer
+      - description: category_ids
+        in: formData
+        name: category_ids
+        type: string
+      - description: test_cases
+        in: formData
+        name: test_cases
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: Problem Create
+      tags:
+      - Admin Method
   /problem-detail:
     get:
       parameters:

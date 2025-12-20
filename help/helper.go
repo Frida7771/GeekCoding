@@ -19,6 +19,7 @@ import (
 type UserClaims struct {
 	Identity string `json:"identity"`
 	Name     string `json:"name"`
+	IsAdmin  int    `json:"is_admin"`
 	jwt.RegisteredClaims
 }
 
@@ -28,13 +29,14 @@ func MD5(s string) string {
 }
 
 // 生成 token
-func GenerateToken(identity string, name string) (string, error) {
+func GenerateToken(identity string, name string, isAdmin int) (string, error) {
 
 	var myKey = []byte("GeekCoding-key")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaims{
 		Identity: identity,
 		Name:     name,
+		IsAdmin:  isAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
 		},
