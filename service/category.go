@@ -19,7 +19,7 @@ import (
 // @Param        size  query     int     false  "size"
 // @Param        keyword  query     string     false  "keyword"
 // @Success      200   {string}    json "{"code":"200","msg","","data": ""}"
-// @Router       /category-list [get]
+// @Router       /admin/category-list [get]
 func GetCategoryList(c *gin.Context) {
 	size, _ := strconv.Atoi(c.DefaultQuery("size", define.DefaultSize))
 	page, err := strconv.Atoi(c.DefaultQuery("page", define.DefaultPage))
@@ -58,7 +58,7 @@ func GetCategoryList(c *gin.Context) {
 // @Param        name  formData     string     true  "name"
 // @Param        parent_id  formData     int     false  "parent_id"
 // @Success      200   {string}    json "{"code":"200","msg","","data": ""}"
-// @Router       /category-create [post]
+// @Router       /admin/category-create [post]
 func CreateCategory(c *gin.Context) {
 	name := c.PostForm("name")
 	parent_id, _ := strconv.Atoi(c.PostForm("parent_id"))
@@ -88,7 +88,7 @@ func CreateCategory(c *gin.Context) {
 // @Param        Authorization header     string     true  "Authorization"
 // @Param        identity  query     string     true  "identity"
 // @Success      200   {string}    json "{"code":"200","msg","","data": ""}"
-// @Router       /category-delete [delete]
+// @Router       /admin/category-delete [delete]
 func DeleteCategory(c *gin.Context) {
 	identity := c.Query("identity")
 	if identity == "" {
@@ -138,7 +138,7 @@ func DeleteCategory(c *gin.Context) {
 // @Param        identity  query     string     true  "identity"
 // @Param        name  formData     string     true  "name"
 // @Success      200   {string}    json "{"code":"200","msg","","data": ""}"
-// @Router       /category-update [put]
+// @Router       /admin/category-update [put]
 func UpdateCategory(c *gin.Context) {
 	identity := c.Query("identity")
 	parent_id, _ := strconv.Atoi(c.PostForm("parent_id"))

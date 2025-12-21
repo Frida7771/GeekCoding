@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/category-create": {
+        "/admin/category-create": {
             "post": {
                 "tags": [
                     "Admin Method"
@@ -62,7 +62,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/category-delete": {
+        "/admin/category-delete": {
             "delete": {
                 "tags": [
                     "Admin Method"
@@ -94,7 +94,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/category-list": {
+        "/admin/category-list": {
             "get": {
                 "tags": [
                     "Admin Method"
@@ -137,7 +137,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/category-update": {
+        "/admin/category-update": {
             "put": {
                 "tags": [
                     "Admin Method"
@@ -182,37 +182,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/login": {
-            "post": {
-                "tags": [
-                    "Public Method"
-                ],
-                "summary": "User Login",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "username",
-                        "name": "username",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "password",
-                        "name": "password",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 200, \"data\": \"\"}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/problem-create": {
+        "/admin/problem-create": {
             "post": {
                 "tags": [
                     "Admin Method"
@@ -244,13 +214,89 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "max_runtime",
                         "name": "max_runtime",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "integer",
                         "description": "max_mem",
                         "name": "max_mem",
-                        "in": "formData"
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "category_ids",
+                        "name": "category_ids",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "test_cases",
+                        "name": "test_cases",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": \"\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/problem-update": {
+            "put": {
+                "tags": [
+                    "Admin Method"
+                ],
+                "summary": "Problem Update",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "identity",
+                        "name": "identity",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "title",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "content",
+                        "name": "content",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "max_runtime",
+                        "name": "max_runtime",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "max_mem",
+                        "name": "max_mem",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -264,6 +310,36 @@ const docTemplate = `{
                         "name": "test_cases",
                         "in": "formData",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": \"\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": [
+                    "Public Method"
+                ],
+                "summary": "User Login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "username",
+                        "name": "username",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "password",
+                        "name": "password",
+                        "in": "formData"
                     }
                 ],
                 "responses": {

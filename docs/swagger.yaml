@@ -13,7 +13,7 @@ info:
   title: GeekCoding API
   version: "1.0"
 paths:
-  /category-create:
+  /admin/category-create:
     post:
       parameters:
       - description: Authorization
@@ -38,7 +38,7 @@ paths:
       summary: Create Category
       tags:
       - Admin Method
-  /category-delete:
+  /admin/category-delete:
     delete:
       parameters:
       - description: Authorization
@@ -59,7 +59,7 @@ paths:
       summary: Delete Category
       tags:
       - Admin Method
-  /category-list:
+  /admin/category-list:
     get:
       parameters:
       - description: Authorization
@@ -87,7 +87,7 @@ paths:
       summary: Get Category List
       tags:
       - Admin Method
-  /category-update:
+  /admin/category-update:
     put:
       parameters:
       - description: Authorization
@@ -117,26 +117,7 @@ paths:
       summary: Update Category
       tags:
       - Admin Method
-  /login:
-    post:
-      parameters:
-      - description: username
-        in: formData
-        name: username
-        type: string
-      - description: password
-        in: formData
-        name: password
-        type: string
-      responses:
-        "200":
-          description: '{"code": 200, "data": ""}'
-          schema:
-            type: string
-      summary: User Login
-      tags:
-      - Public Method
-  /problem-create:
+  /admin/problem-create:
     post:
       parameters:
       - description: Authorization
@@ -157,10 +138,63 @@ paths:
       - description: max_runtime
         in: formData
         name: max_runtime
+        required: true
         type: integer
       - description: max_mem
         in: formData
         name: max_mem
+        required: true
+        type: integer
+      - description: category_ids
+        in: formData
+        name: category_ids
+        required: true
+        type: string
+      - description: test_cases
+        in: formData
+        name: test_cases
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: Problem Create
+      tags:
+      - Admin Method
+  /admin/problem-update:
+    put:
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: identity
+        in: formData
+        name: identity
+        required: true
+        type: string
+      - description: title
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: content
+        in: formData
+        name: content
+        required: true
+        type: string
+      - description: max_runtime
+        in: formData
+        name: max_runtime
+        required: true
+        type: integer
+      - description: max_mem
+        in: formData
+        name: max_mem
+        required: true
         type: integer
       - description: category_ids
         in: formData
@@ -176,9 +210,28 @@ paths:
           description: '{"code": 200, "data": ""}'
           schema:
             type: string
-      summary: Problem Create
+      summary: Problem Update
       tags:
       - Admin Method
+  /login:
+    post:
+      parameters:
+      - description: username
+        in: formData
+        name: username
+        type: string
+      - description: password
+        in: formData
+        name: password
+        type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: User Login
+      tags:
+      - Public Method
   /problem-detail:
     get:
       parameters:

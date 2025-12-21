@@ -34,16 +34,21 @@ func Router() *gin.Engine {
 	r.GET("/submit-list", service.GetSubmitList)
 
 	//管理员私有方法
-	r.POST("/problem-create", middlewares.AuthAdmin(), service.ProblemCreate)
+	authAdmin := r.Group("/admin", middlewares.AuthAdmin())
+
+	//create problem
+	authAdmin.POST("/problem-create", service.ProblemCreate)
+	//update problem
+	authAdmin.PUT("/problem-update", service.ProblemUpdate)
 
 	// 分页获取分类列表
-	r.GET("/category-list", middlewares.AuthAdmin(), service.GetCategoryList)
+	authAdmin.GET("/category-list", service.GetCategoryList)
 	//create category
-	r.POST("/category-create", middlewares.AuthAdmin(), service.CreateCategory)
+	authAdmin.POST("/category-create", service.CreateCategory)
 	//delete category
-	r.DELETE("/category-delete", middlewares.AuthAdmin(), service.DeleteCategory)
+	authAdmin.DELETE("/category-delete", service.DeleteCategory)
 	//update category
-	r.PUT("/category-update", middlewares.AuthAdmin(), service.UpdateCategory)
+	authAdmin.PUT("/category-update", service.UpdateCategory)
 
 	return r
 }
