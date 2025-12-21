@@ -5,6 +5,9 @@
 *.dll
 *.so
 *.dylib
+GeekCoding
+geekcoding
+geek-coding
 
 # Build output
 /bin/
@@ -48,3 +51,32 @@ Thumbs.db
 # ===== Logs =====
 *.log
 logs/
+
+# ===== User submitted code =====
+code/
+# Temporary code files (saved to system temp directory)
+/tmp/code/
+
+# ===== Swagger generated docs (optional - uncomment if you don't want to commit docs) =====
+# docs/swagger.json
+# docs/swagger.yaml
+# docs/docs.go
+
+# ===== Docker =====
+# Docker build cache and temporary files
+.docker/
+
+# ===== Database =====
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== Air (live reload tool) =====
+tmp/
+.air.toml
+
+# ===== Backup files =====
+*.bak
+*.backup
+*~
+

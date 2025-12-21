@@ -102,7 +102,7 @@ func GetProblemDetail(c *gin.Context) {
 // @Param        max_runtime  formData     int       true  "max_runtime"
 // @Param        max_mem  formData     int       true  "max_mem"
 // @Param        category_ids  formData     string     true  "category_ids"
-// @Param        test_cases  formData     string     true  "test_cases"
+// @Param        test_cases  body     string     true  "test_cases"
 // @Success      200   {string}    json "{"code": 200, "data": ""}"
 // @Router       /admin/problem-create [post]
 func ProblemCreate(c *gin.Context) {
@@ -202,7 +202,7 @@ func ProblemCreate(c *gin.Context) {
 // @Param        max_runtime  formData     int         true  "max_runtime"
 // @Param        max_mem  formData     int         true  "max_mem"
 // @Param        category_ids  formData     string     false  "category_ids"
-// @Param        test_cases  formData     string     true  "test_cases"
+// @Param        test_cases  formData     string     true  "test_cases (JSON array, supports multi-line)"
 // @Success      200   {string}    json "{"code": 200, "data": ""}"
 // @Router       /admin/problem-update [put]
 func ProblemUpdate(c *gin.Context) {

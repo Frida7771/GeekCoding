@@ -151,10 +151,11 @@ paths:
         required: true
         type: string
       - description: test_cases
-        in: formData
+        in: body
         name: test_cases
         required: true
-        type: string
+        schema:
+          type: string
       responses:
         "200":
           description: '{"code": 200, "data": ""}'
@@ -200,7 +201,7 @@ paths:
         in: formData
         name: category_ids
         type: string
-      - description: test_cases
+      - description: test_cases (JSON array, supports multi-line)
         in: formData
         name: test_cases
         required: true
@@ -387,4 +388,31 @@ paths:
       summary: Get User Detail
       tags:
       - Public Method
+  /user/submit:
+    post:
+      parameters:
+      - description: authorization
+        in: header
+        name: authorization
+        required: true
+        type: string
+      - description: problem identity
+        in: query
+        name: problem_identity
+        required: true
+        type: string
+      - description: code
+        in: body
+        name: code
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: '{"code": 200, "data": ""}'
+          schema:
+            type: string
+      summary: Submit Code
+      tags:
+      - User Private Method
 swagger: "2.0"

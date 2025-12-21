@@ -232,11 +232,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
                         "description": "test_cases",
                         "name": "test_cases",
-                        "in": "formData",
-                        "required": true
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
@@ -306,7 +308,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "test_cases",
+                        "description": "test_cases (JSON array, supports multi-line)",
                         "name": "test_cases",
                         "in": "formData",
                         "required": true
@@ -580,6 +582,47 @@ const docTemplate = `{
                         "name": "identity",
                         "in": "query",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 200, \"data\": \"\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/submit": {
+            "post": {
+                "tags": [
+                    "User Private Method"
+                ],
+                "summary": "Submit Code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "authorization",
+                        "name": "authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "problem identity",
+                        "name": "problem_identity",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "code",
+                        "name": "code",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {

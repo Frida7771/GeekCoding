@@ -94,3 +94,23 @@ func GetRandomCode() string {
 	}
 	return s
 }
+
+// save code
+func SaveCode(code []byte) (string, error) {
+	// 使用系统临时目录，避免影响 swag init
+	tmpDir := os.TempDir()
+	dirName := tmpDir + "/code/" + GetUUID()
+	path := dirName + "/main.go"
+	err := os.MkdirAll(dirName, 0777)
+	if err != nil {
+		return "", err
+	}
+	f, err := os.Create(path)
+	if err != nil {
+		return "", err
+	}
+	f.Write(code)
+	defer f.Close()
+	return path, nil
+
+}

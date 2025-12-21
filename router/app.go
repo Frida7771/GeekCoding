@@ -50,5 +50,10 @@ func Router() *gin.Engine {
 	//update category
 	authAdmin.PUT("/category-update", service.UpdateCategory)
 
+	//user private method
+	authUser := r.Group("/user", middlewares.AuthUser())
+	//submit code
+	authUser.POST("/submit", service.SubmitCode)
+
 	return r
 }
