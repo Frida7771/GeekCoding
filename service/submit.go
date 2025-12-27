@@ -22,6 +22,72 @@ import (
 	"gorm.io/gorm"
 )
 
+// GetSubmitStatus
+// @Tags         Public Method
+// @Summary      Get Submit Status (with Redis cache)
+// @Param        identity  query     string     true  "submit identity"
+// @Success      200   {string}    json "{"code": 200, "data": ""}"
+// @Router       /submit-status [get]
+func GetSubmitStatus(c *gin.Context) {
+	identity := c.Query("identity")
+	if identity == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code": -1,
+			"msg":  "submit identity is required",
+		})
+		return
+	}
+
+	// 优先从 Redis 读取
+	statusInfo, err := models.GetSubmitStatusFromRedis(identity)
+	if err == nil && statusInfo != nil {
+		// Redis 中有数据，直接返回
+		c.JSON(http.StatusOK, gin.H{
+			"code": 200,
+			"data": map[string]interface{}{
+				"identity":         statusInfo.Identity,
+				"problem_identity": statusInfo.ProblemIdentity,
+				"user_identity":    statusInfo.UserIdentity,
+				"status":           statusInfo.Status,
+				"from_cache":       true,
+			},
+		})
+		return
+	}
+
+	// Redis 中没有，从 MySQL 读取
+	var submit models.Submit_Basic
+	err = models.DB.Where("identity = ?", identity).First(&submit).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusOK, gin.H{
+				"code": -1,
+				"msg":  "submit not found",
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"code": -1,
+				"msg":  "get submit status error: " + err.Error(),
+			})
+		}
+		return
+	}
+
+	// 从 MySQL 读取后，同步到 Redis（下次查询更快）
+	models.SaveSubmitStatusToRedis(&submit)
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": map[string]interface{}{
+			"identity":         submit.Identity,
+			"problem_identity": submit.ProblemIdentity,
+			"user_identity":    submit.UserIdentity,
+			"status":           submit.Status,
+			"from_cache":       false,
+		},
+	})
+}
+
 // GetSubmitList
 // @Tags         Public Method
 // @Summary      Get Submit List
@@ -112,11 +178,13 @@ func SubmitCode(c *gin.Context) {
 		})
 		return
 	}
+	submitIdentity := help.GetUUID()
 	sb := &models.Submit_Basic{
-		Identity:        help.GetUUID(),
+		Identity:        submitIdentity,
 		ProblemIdentity: problemIdentity,
 		UserIdentity:    userClaim.Identity,
 		Path:            path,
+		Status:          -1, // 初始状态：待判断
 	}
 	//judging
 	pb := new(models.ProblemBasic)
@@ -175,15 +243,21 @@ func SubmitCode(c *gin.Context) {
 			})
 			return
 		}
+		// 保存状态到 Redis
+		models.SaveSubmitStatusToRedis(sb)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"data": map[string]interface{}{
-				"status": sb.Status,
-				"msg":    buildStderr.String(),
+				"identity": submitIdentity,
+				"status":   sb.Status,
+				"msg":      buildStderr.String(),
 			},
 		})
 		return
 	}
+
+	// 提交开始时，先保存到 Redis（状态为 -1 待判断）
+	models.SaveSubmitStatusToRedis(sb)
 
 	//wrong answer
 	WA := make(chan int)
@@ -224,21 +298,11 @@ func SubmitCode(c *gin.Context) {
 			ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
 			defer cancel()
 
-			// 为每个容器生成唯一名称，用于超时后强制停止
-			containerName := "geekcoding-" + help.GetUUID()
-
 			// 标记测试用例开始执行
 			defer func() {
 				lock.Lock()
 				completedCount++
 				lock.Unlock()
-			}()
-
-			// 确保容器在 goroutine 退出时被清理（防止死循环容器泄漏）
-			defer func() {
-				// 如果容器还在运行，强制停止并删除
-				// 使用 -f 强制删除，即使容器还在运行
-				exec.Command("docker", "rm", "-f", containerName).Run()
 			}()
 
 			// 使用 Docker 运行，设置完整的安全沙盒配置
@@ -261,8 +325,7 @@ func SubmitCode(c *gin.Context) {
 			// 构建 Docker 命令 - 完整的安全沙盒配置
 			dockerArgs := []string{
 				"run",
-				"--name", containerName, // 给容器命名，用于后续强制停止
-				"--rm",                                      // 自动删除容器（但需要容器先退出）
+				"--rm",                                      // 自动删除容器
 				"--network=none",                            // 网络隔离
 				"--memory=" + memoryLimit,                   // 内存限制
 				"--memory-swap=" + memoryLimit,              // 禁用 swap
@@ -312,23 +375,11 @@ func SubmitCode(c *gin.Context) {
 			// 检查是否超时（必须在 Wait() 之后检查，因为 context 超时会自动取消命令）
 			// 注意：exec.CommandContext 会在 context 超时时自动杀死进程
 			if ctx.Err() == context.DeadlineExceeded {
-				// Context 超时，CommandContext 应该已经杀死了 docker run 命令
-				// 但是容器内的进程（如死循环）可能还在运行，需要强制停止容器
-
-				// 1. 尝试杀死 docker run 进程（如果还在运行）
+				// Context 超时，CommandContext 应该已经杀死了进程
+				// 但为了确保，再次尝试杀死
 				if dockerCmd.Process != nil {
 					dockerCmd.Process.Kill()
 				}
-
-				// 2. 强制停止容器（防止死循环容器继续运行）
-				// 使用 --time=0 立即强制停止，不等待优雅关闭
-				stopCmd := exec.Command("docker", "stop", "--time=0", containerName)
-				stopCmd.Run() // 忽略错误，容器可能已经停止
-
-				// 3. 强制删除容器（确保清理）
-				rmCmd := exec.Command("docker", "rm", "-f", containerName)
-				rmCmd.Run() // 忽略错误，容器可能已经删除
-
 				// 这个测试用例超时，发送 TLE 信号
 				// 注意：如果有多个测试用例，只有第一个超时的会发送信号
 				select {
@@ -400,15 +451,23 @@ func SubmitCode(c *gin.Context) {
 		// 所有测试用例都通过，明确标记为 AC
 		sb.Status = 1
 		msg = "答案正确"
+		// 更新 Redis 状态
+		models.UpdateSubmitStatusInRedis(sb.Identity, 1)
 	case <-WA:
 		// 答案错误（优先级高于超时）
 		sb.Status = 2
+		// 更新 Redis 状态
+		models.UpdateSubmitStatusInRedis(sb.Identity, 2)
 	case <-OOM:
 		// 运行超内存
 		sb.Status = 4
+		// 更新 Redis 状态
+		models.UpdateSubmitStatusInRedis(sb.Identity, 4)
 	case <-TLE:
 		// 运行超时（单个测试用例超时）
 		sb.Status = 3
+		// 更新 Redis 状态
+		models.UpdateSubmitStatusInRedis(sb.Identity, 3)
 	case <-globalTimeout:
 		// 全局超时（兜底机制），检查所有测试用例的状态
 		lock.Lock()
@@ -419,18 +478,24 @@ func SubmitCode(c *gin.Context) {
 				// 所有测试用例都通过了，但可能因为竞态条件没有收到 AC 信号
 				sb.Status = 1
 				msg = "答案正确"
+				// 更新 Redis 状态
+				models.UpdateSubmitStatusInRedis(sb.Identity, 1)
 			} else {
 				// 有测试用例失败，但已经通过其他 channel 处理了（WA/OOM/TLE）
 				// 这里不应该到达，因为其他 channel 应该已经处理了
 				// 如果到达这里，说明有测试用例失败但没有发送信号，标记为错误
 				sb.Status = 2
 				msg = "答案错误"
+				// 更新 Redis 状态
+				models.UpdateSubmitStatusInRedis(sb.Identity, 2)
 			}
 		} else {
 			// 还有测试用例未完成，说明确实超时了
 			// 可能是所有测试用例都超时，或者部分超时
 			sb.Status = 3
 			msg = "运行超时"
+			// 更新 Redis 状态
+			models.UpdateSubmitStatusInRedis(sb.Identity, 3)
 		}
 		lock.Unlock()
 	}
@@ -459,11 +524,14 @@ func SubmitCode(c *gin.Context) {
 		})
 		return
 	}
+	// 最终状态更新到 Redis
+	models.SaveSubmitStatusToRedis(sb)
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": map[string]interface{}{
-			"status": sb.Status,
-			"msg":    msg,
+			"identity": submitIdentity,
+			"status":   sb.Status,
+			"msg":      msg,
 		},
 	})
 }

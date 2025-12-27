@@ -18,42 +18,43 @@ func Router() *gin.Engine {
 	//swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// problem
-	r.GET("/problem-list", service.GetProblemList)
-	r.GET("/problem-detail", service.GetProblemDetail)
+	// problem (with query rate limiting)
+	r.GET("/problem-list", middlewares.QueryRateLimit(), service.GetProblemList)
+	r.GET("/problem-detail", middlewares.QueryRateLimit(), service.GetProblemDetail)
 
 	//user
-	r.GET("/user-detail", service.GetUserDetail)
-	r.POST("/login", service.Login)
-	r.POST("/send-code", service.SendCode)
-	r.POST("/register", service.Register)
+	r.GET("/user-detail", middlewares.QueryRateLimit(), service.GetUserDetail)
+	r.POST("/login", middlewares.LoginRateLimit(), service.Login)
+	r.POST("/send-code", middlewares.SendCodeRateLimit(), service.SendCode)
+	r.POST("/register", middlewares.RegisterRateLimit(), service.Register)
 	//排行榜
-	r.GET("/rank-list", service.GetRankList)
+	r.GET("/rank-list", middlewares.QueryRateLimit(), service.GetRankList)
 
 	//submit
-	r.GET("/submit-list", service.GetSubmitList)
+	r.GET("/submit-list", middlewares.QueryRateLimit(), service.GetSubmitList)
+	r.GET("/submit-status", middlewares.QueryRateLimit(), service.GetSubmitStatus)
 
 	//管理员私有方法
 	authAdmin := r.Group("/admin", middlewares.AuthAdmin())
 
-	//create problem
-	authAdmin.POST("/problem-create", service.ProblemCreate)
+	//create problem (with admin operation rate limiting)
+	authAdmin.POST("/problem-create", middlewares.AdminOperationRateLimit(), service.ProblemCreate)
 	//update problem
-	authAdmin.PUT("/problem-update", service.ProblemUpdate)
+	authAdmin.PUT("/problem-update", middlewares.AdminOperationRateLimit(), service.ProblemUpdate)
 
 	// 分页获取分类列表
-	authAdmin.GET("/category-list", service.GetCategoryList)
+	authAdmin.GET("/category-list", middlewares.QueryRateLimit(), service.GetCategoryList)
 	//create category
-	authAdmin.POST("/category-create", service.CreateCategory)
-	//delete category
-	authAdmin.DELETE("/category-delete", service.DeleteCategory)
+	authAdmin.POST("/category-create", middlewares.AdminOperationRateLimit(), service.CreateCategory)
+	//delete category (dangerous operation, stricter rate limit)
+	authAdmin.DELETE("/category-delete", middlewares.AdminOperationRateLimit(), service.DeleteCategory)
 	//update category
-	authAdmin.PUT("/category-update", service.UpdateCategory)
+	authAdmin.PUT("/category-update", middlewares.AdminOperationRateLimit(), service.UpdateCategory)
 
 	//user private method
 	authUser := r.Group("/user", middlewares.AuthUser())
-	//submit code
-	authUser.POST("/submit", service.SubmitCode)
+	//submit code (with rate limiting)
+	authUser.POST("/submit", middlewares.SubmitRateLimit(), service.SubmitCode)
 
 	return r
 }
