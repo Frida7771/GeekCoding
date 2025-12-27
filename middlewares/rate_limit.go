@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 )
 
 // RateLimitConfig 限流配置
@@ -73,45 +72,56 @@ func RateLimit(config RateLimitConfig) gin.HandlerFunc {
 }
 
 // checkRateLimit 检查是否超过限流
-// 使用滑动窗口算法
+// 使用滑动窗口算法，通过 Lua 脚本保证原子性
 func checkRateLimit(c *gin.Context, key string, window time.Duration, maxRequests int) bool {
 	ctx := context.Background()
 	now := time.Now()
-	windowStart := now.Add(-window)
-
-	// 使用 Redis 的 ZSet 实现滑动窗口
-	// key: rate_limit:{key}
-	// score: 时间戳（秒）
-	// member: 请求ID（使用时间戳+随机数）
+	windowStart := now.Add(-window).Unix()
 
 	zsetKey := fmt.Sprintf("rate_limit:%s", key)
+	member := fmt.Sprintf("%d:%d", now.UnixNano(), now.Nanosecond())
+	score := float64(now.Unix())
+	expireSeconds := int((window + time.Minute).Seconds())
 
-	// 移除窗口外的记录
-	models.RDB.ZRemRangeByScore(ctx, zsetKey, "0", fmt.Sprintf("%d", windowStart.Unix()))
+	// 使用 Lua 脚本保证原子性：清理过期数据、统计、判断、添加、设置过期时间
+	luaScript := `
+		local key = KEYS[1]
+		local window_start = tonumber(ARGV[1])
+		local max_requests = tonumber(ARGV[2])
+		local score = tonumber(ARGV[3])
+		local member = ARGV[4]
+		local expire_seconds = tonumber(ARGV[5])
+		
+		-- 移除窗口外的记录
+		redis.call('ZREMRANGEBYSCORE', key, 0, window_start)
+		
+		-- 获取当前窗口内的请求数
+		local count = redis.call('ZCARD', key)
+		
+		-- 如果超过限制，返回 0（拒绝）
+		if count >= max_requests then
+			return 0
+		end
+		
+		-- 记录本次请求
+		redis.call('ZADD', key, score, member)
+		
+		-- 设置过期时间
+		redis.call('EXPIRE', key, expire_seconds)
+		
+		-- 返回 1（允许）
+		return 1
+	`
 
-	// 获取当前窗口内的请求数
-	count, err := models.RDB.ZCard(ctx, zsetKey).Result()
+	result, err := models.RDB.Eval(ctx, luaScript, []string{zsetKey},
+		windowStart, maxRequests, score, member, expireSeconds).Result()
 	if err != nil {
 		// Redis 错误，允许请求通过（降级策略）
 		return true
 	}
 
-	// 如果超过限制，拒绝请求
-	if int(count) >= maxRequests {
-		return false
-	}
-
-	// 记录本次请求
-	member := fmt.Sprintf("%d:%d", now.UnixNano(), now.Nanosecond())
-	models.RDB.ZAdd(ctx, zsetKey, redis.Z{
-		Score:  float64(now.Unix()),
-		Member: member,
-	})
-
-	// 设置过期时间（窗口时间 + 1分钟缓冲）
-	models.RDB.Expire(ctx, zsetKey, window+time.Minute)
-
-	return true
+	// Lua 脚本返回 1 表示允许，0 表示拒绝
+	return result.(int64) == 1
 }
 
 // SubmitRateLimit 提交接口限流（用户级别 + IP 级别）
