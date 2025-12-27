@@ -100,32 +100,56 @@ func GetSubmitStatusFromRedis(identity string) (*SubmitStatusInfo, error) {
 	return &statusInfo, nil
 }
 
-// UpdateSubmitStatusInRedis 更新 Redis 中的提交状态
+// UpdateSubmitStatusInRedis 更新 Redis 中的提交状态（原子操作）
 func UpdateSubmitStatusInRedis(identity string, status int) error {
 	ctx := context.Background()
 	key := "submit_status:" + identity
+	updatedAt := time.Now().Unix()
 
-	// 先获取现有数据
-	data, err := RDB.Get(ctx, key).Result()
+	// 使用 Lua 脚本保证原子性：获取、解析、更新、保存
+	luaScript := `
+		local key = KEYS[1]
+		local new_status = tonumber(ARGV[1])
+		local updated_at = tonumber(ARGV[2])
+		local expire_seconds = tonumber(ARGV[3])
+		
+		-- 获取现有数据
+		local data = redis.call('GET', key)
+		if not data then
+			-- 如果 Redis 中没有，返回 0（不更新）
+			return 0
+		end
+		
+		-- 解析 JSON（Redis Lua 支持 cjson）
+		local cjson = cjson or require('cjson')
+		local status_info = cjson.decode(data)
+		
+		-- 更新状态和时间戳
+		status_info.status = new_status
+		status_info.updated_at = updated_at
+		
+		-- 序列化回 JSON
+		local new_data = cjson.encode(status_info)
+		
+		-- 保存到 Redis
+		redis.call('SET', key, new_data, 'EX', expire_seconds)
+		
+		-- 返回 1（成功）
+		return 1
+	`
+
+	result, err := RDB.Eval(ctx, luaScript, []string{key},
+		status, updatedAt, 24*3600).Result()
 	if err != nil {
-		// 如果 Redis 中没有，就不更新了
+		// Lua 脚本执行失败，可能是 JSON 解析错误或 Redis 中没有数据
+		// 返回 nil 表示不更新（降级策略）
 		return nil
 	}
 
-	var statusInfo SubmitStatusInfo
-	if err := json.Unmarshal([]byte(data), &statusInfo); err != nil {
-		return err
+	// Lua 脚本返回 1 表示成功，0 表示数据不存在
+	if result.(int64) == 0 {
+		return nil
 	}
 
-	// 更新状态和时间
-	statusInfo.Status = status
-	statusInfo.UpdatedAt = time.Now().Unix()
-
-	// 保存回 Redis
-	newData, err := json.Marshal(statusInfo)
-	if err != nil {
-		return err
-	}
-
-	return RDB.Set(ctx, key, newData, 24*time.Hour).Err()
+	return nil
 }
